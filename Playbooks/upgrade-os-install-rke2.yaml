@@ -1,0 +1,92 @@
+## This playbook is meant for testing purposes ONLY
+##
+## Use with caution, config differently as needed
+##
+## Hosts are using Ubuntu 23.10 as of creating this
+##
+## TL;DR this playbook will install upgrade your underlying os, install rke2, and register
+## the cluster into Rancher as an imported cluster.
+##
+## version: v0.0.2
+
+- name: upgrade systems
+  hosts: dohosts
+  remote_user: root
+
+  tasks:
+    - name: Update and upgrade systems
+      apt:
+        upgrade: yes
+        autoclean: yes
+
+#    - name: Reboot machine after upgrade and send a message
+#      ansible.builtin.reboot:
+#        msg: "Rebooting machine in 5 seconds"
+
+- name: Add nodes into Rancher as RKE2 cluster
+  hosts: dohosts
+  remote_user: root
+
+  tasks:
+#
+#    - name: Install RKE2
+#      ansible.builtin.shell:
+#
+#     \\\\ RKE2 version can be swapped for a different version \\\\
+#        cmd: curl -sfL https://get.rke2.io | INSTALL_RKE2_VERSION=v1.27.10+rke2r1 sh -
+#
+#    - name: Enable RKE2 server
+#      ansible.builtin.shell:
+#        cmd: systemctl enable rke2-server.service
+#
+#    - name: Start RKE2 server
+#      ansible.builtin.shell:
+#        cmd: systemctl start rke2-server.service
+
+    - name: Check RKE2 server status
+      ansible.builtin.shell:
+        cmd: systemctl status rke2-server.service
+
+
+- name: Run kubectl commands
+  hosts: dohosts
+  remote_user: root
+
+  tasks:
+#    - name: Place Kubectl in path
+#      ansible.builtin.shell:
+#        cmd: cp /var/lib/rancher/rke2/bin/kubectl /usr/bin/
+#
+#    - name: Create kube directory
+#      ansible.builtin.shell:
+#        cmd: mkdir ~/.kube/ && cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
+#
+#    - name: Export Kubeconfig
+#      ansible.builtin.shell:
+#        cmd: export KUBECONFIG=~/.kube/config
+
+    - name: Get nodes (Kubectl)
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/kubectl
+          - get
+          - nodes
+
+
+- name: Rancher section
+  hosts: ## Enter one specific host here ##
+  remote_user: root
+
+  tasks:
+    - name: Add node to Rancher
+      ansible.builtin.shell:
+        cmd: ## Enter your registration command ##
+
+    - name: Check for Rancher pods
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/kubectl
+          - get
+          - pods
+          - -n
+          - cattle-system
