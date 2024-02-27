@@ -7,7 +7,7 @@
 ## TL;DR this playbook will install upgrade your underlying os, install rke2, and register
 ## the cluster into Rancher as an imported cluster.
 ##
-## version: v0.0.2
+## version: v0.0.3
 
 - name: upgrade systems
   hosts: dohosts
@@ -23,11 +23,11 @@
 #      ansible.builtin.reboot:
 #        msg: "Rebooting machine in 5 seconds"
 
-- name: Add nodes into Rancher as RKE2 cluster
-  hosts: dohosts
-  remote_user: root
-
-  tasks:
+#- name: Add nodes into Rancher as RKE2 cluster
+#  hosts: dohosts
+#  remote_user: root
+#
+#  tasks:
 #
 #    - name: Install RKE2
 #      ansible.builtin.shell:
@@ -42,10 +42,10 @@
 #    - name: Start RKE2 server
 #      ansible.builtin.shell:
 #        cmd: systemctl start rke2-server.service
-
-    - name: Check RKE2 server status
-      ansible.builtin.shell:
-        cmd: systemctl status rke2-server.service
+#
+#    - name: Check RKE2 server status
+#      ansible.builtin.shell:
+#        cmd: systemctl status rke2-server.service
 
 
 - name: Run kubectl commands
@@ -68,25 +68,33 @@
     - name: Get nodes (Kubectl)
       ansible.builtin.command:
         argv:
-          - /usr/bin/kubectl
+          - /usr/local/bin/kubectl
           - get
           - nodes
 
 
-- name: Rancher section
-  hosts: ## Enter one specific host here ##
+- name: Add nodes to Rancher
+  hosts: dohosts
   remote_user: root
 
   tasks:
-    - name: Add node to Rancher
-      ansible.builtin.shell:
-        cmd: ## Enter your registration command ##
+#    - name: Add node to Rancher
+#      ansible.builtin.shell:
+#        cmd:
 
     - name: Check for Rancher pods
       ansible.builtin.command:
         argv:
-          - /usr/bin/kubectl
+          - /usr/local/bin/kubectl
           - get
           - pods
           - -n
           - cattle-system
+
+#    - name: Install Kubectl
+#      ansible.builtin.shell:
+#        cmd: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+#    - name: Make .kube dir and create config file
+#      ansible.builtin.shell:
+#        cmd: mkdir ~/.kube && touch ~/.kube/config
